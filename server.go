@@ -37,6 +37,8 @@ type UserInfo struct {
 	UserName    string `json:"user_name"`
 	EMail       string `json:"email"`
 	ConnectorID string `json:"connector_id"`
+	Sub         string `json:"sub"`
+	Name        string `json:"name"`
 }
 
 func init() {
@@ -174,6 +176,8 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 		User.UserID = us.Get("UserID").(string)
 		User.EMail = us.Get("EMail").(string)
+		User.Name = us.Get("UserID").(string)
+		User.Sub = us.Get("UserID").(string)
 
 		return
 	}
