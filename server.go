@@ -144,6 +144,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if ispUser.Auth == true && strings.Contains(ug[1], UserGroup) {
 			us.Set("LoggedInUserID", ispUser.Client.Username)
 			us.Set("EMail", ispUser.Client.EMail)
+			us.Set("UserName", ispUser.Client.Username)
 			w.Header().Set("Location", "/auth")
 			w.WriteHeader(http.StatusFound)
 			return
@@ -176,7 +177,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 
 		User.UserID = us.Get("UserID").(string)
 		User.EMail = us.Get("EMail").(string)
-		User.Name = us.Get("UserID").(string)
+		User.Name = us.Get("UserName").(string)
 		User.Sub = us.Get("UserID").(string)
 
 		return
