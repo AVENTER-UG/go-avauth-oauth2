@@ -32,8 +32,6 @@ func AuthUser(username, password string) cfg.CheckAuth {
 
 	json.NewDecoder(res.Body).Decode(&user)
 
-	logrus.Println(user)
-
 	return user
 
 }

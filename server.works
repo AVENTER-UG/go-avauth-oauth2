@@ -8,16 +8,14 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/go-session/session"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/oauth2.v3/errors"
-	"gopkg.in/oauth2.v3/generates"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/models"
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/oauth2.v3/store"
+	"gopkg.in/session.v1"
 )
 
 var (
@@ -43,7 +41,8 @@ type UserInfo struct {
 	Name        string `json:"name"`
 }
 
-func main() {
+func init() {
+
 	AuthServer = os.Getenv("AUTH_SERVER")
 	ClientDomain = os.Getenv("CLIENTDOMAIN")
 	ClientID = os.Getenv("CLIENTID")
@@ -56,14 +55,14 @@ func main() {
 	fmt.Println("ClientSecret=", ClientSecret)
 	fmt.Println("ClientID=", ClientID)
 
-	manager := manage.NewDefaultManager()
-	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
+	globalSessions, _ = session.NewManager("memory", `{"cookieName":"go_session_id","gclifetime":3600}`)
+	go globalSessions.GC()
+}
 
+func main() {
+	manager := manage.NewDefaultManager()
 	// token store
 	manager.MustTokenStorage(store.NewMemoryTokenStore())
-
-	// generate jwt access token
-	manager.MapAccessGenerate(generates.NewAccessGenerate())
 
 	clientStore := store.NewClientStore()
 	clientStore.Set(ClientID, &models.Client{
@@ -74,18 +73,6 @@ func main() {
 	manager.MapClientStorage(clientStore)
 
 	srv := server.NewServer(server.NewConfig(), manager)
-
-	srv.SetPasswordAuthorizationHandler(func(username, password string) (userID string, err error) {
-		ispUser := AuthUser(username, password)
-
-		ug := strings.Split(ispUser.Client.GroupAdditional, ":")
-
-		if ispUser.Auth == true && strings.Contains(ug[1], UserGroup) {
-			return ispUser.Client.Username, nil
-		}
-		return
-	})
-
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
 
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
@@ -99,74 +86,23 @@ func main() {
 
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/auth", authHandler)
-	http.HandleFunc("/userinfo", func(w http.ResponseWriter, r *http.Request) {
-		token, err := srv.ValidationBearerToken(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		var user UserInfo
-
-		user.UserID = token.GetUserID()
-		user.ConnectorID = token.GetUserID()
-
-		//var info []byte
-		info, err := json.Marshal(user)
-
-		if err != nil {
-			log.Println("userInfoHandler: Error Create JSON")
-			return
-		}
-		logrus.Println(user)
-
-		sendJSON(info, w)
-	})
+	http.HandleFunc("/userinfo", userInfoHandler)
 
 	http.HandleFunc("/authorize", func(w http.ResponseWriter, r *http.Request) {
-		store, err := session.Start(nil, w, r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		logrus.Println("Test: ", r)
 
-		var form url.Values
-		if v, ok := store.Get("ReturnUri"); ok {
-			form = v.(url.Values)
-		}
-		r.Form = form
-
-		store.Delete("ReturnUri")
-		store.Save()
-
-		err = srv.HandleAuthorizeRequest(w, r)
+		err := srv.HandleAuthorizeRequest(w, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
 
 	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		logrus.Println("TestB: ", r)
 		err := srv.HandleTokenRequest(w, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	})
-
-	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		token, err := srv.ValidationBearerToken(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		data := map[string]interface{}{
-			"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
-			"client_id":  token.GetClientID(),
-			"user_id":    token.GetUserID(),
-		}
-		e := json.NewEncoder(w)
-		e.SetIndent("", "  ")
-		e.Encode(data)
 	})
 
 	log.Println("Server is running at 9096 port.")
@@ -174,40 +110,31 @@ func main() {
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
-	store, err := session.Start(nil, w, r)
-	if err != nil {
-		return
-	}
+	us, err := globalSessions.SessionStart(w, r)
+	uid := us.Get("UserID")
 
-	uid, ok := store.Get("LoggedInUserID")
-	if !ok {
+	if uid == nil {
 		if r.Form == nil {
 			r.ParseForm()
 		}
-
-		store.Set("ReturnUri", r.Form)
-		store.Save()
-
+		us.Set("Form", r.Form)
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-
 	userID = uid.(string)
-	store.Delete("LoggedInUserID")
-	store.Save()
+	us.Delete("UserID")
 	return
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	store, err := session.Start(nil, w, r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	if r.Method == "POST" {
 
+		us, err := globalSessions.SessionStart(w, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		username := r.FormValue("username")
 		userPassword := r.FormValue("password")
 		ispUser := AuthUser(username, userPassword)
@@ -215,16 +142,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		ug := strings.Split(ispUser.Client.GroupAdditional, ":")
 
 		if ispUser.Auth == true && strings.Contains(ug[1], UserGroup) {
-			store.Set("LoggedInUserID", ispUser.Client.Username)
-			store.Set("EMail", ispUser.Client.EMail)
-			store.Set("UserName", ispUser.Client.Username)
-
-			store.Save()
-
+			us.Set("LoggedInUserID", ispUser.Client.Username)
+			us.Set("EMail", ispUser.Client.EMail)
+			us.Set("UserName", ispUser.Client.Username)
 			w.Header().Set("Location", "/auth")
 			w.WriteHeader(http.StatusFound)
-			return
 
+			logrus.Println("/login: ", us)
+
+			return
 		}
 
 	}
@@ -232,19 +158,56 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func authHandler(w http.ResponseWriter, r *http.Request) {
-	store, err := session.Start(nil, w, r)
+	us, err := globalSessions.SessionStart(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if _, ok := store.Get("LoggedInUserID"); !ok {
+	if us.Get("LoggedInUserID") == nil {
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
+	if r.Method == "POST" {
 
+		form := us.Get("Form").(url.Values)
+		u := new(url.URL)
+		u.Path = "/authorize"
+		u.RawQuery = form.Encode()
+
+		w.Header().Set("Location", u.String())
+
+		w.WriteHeader(http.StatusFound)
+		us.Delete("Form")
+		us.Set("UserID", us.Get("LoggedInUserID"))
+
+		uid := us.Get("UserID")
+		User.UserID = uid.(string)
+		return
+	}
 	outputHTML(w, r, "static/auth.html")
+}
+
+func userInfoHandler(w http.ResponseWriter, r *http.Request) {
+	us, err := globalSessions.SessionStart(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("userInfoHandler: HTTP Error")
+		return
+	}
+
+	logrus.Println("TestA: ", r)
+
+	//var info []byte
+	info, err := json.Marshal(us)
+
+	if err != nil {
+		log.Println("userInfoHandler: Error Create JSON")
+		return
+	}
+	logrus.Println(us)
+
+	sendJSON(info, w)
 }
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
