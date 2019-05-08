@@ -89,12 +89,12 @@ func main() {
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
 
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println("Internal Error:", err.Error())
+		logrus.Println("Internal Error:", err.Error())
 		return
 	})
 
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println("Response Error:", re.Error.Error())
+		logrus.Println("Response Error:", re.Error.Error())
 	})
 
 	http.HandleFunc("/login", loginHandler)
@@ -115,10 +115,9 @@ func main() {
 		info, err := json.Marshal(user)
 
 		if err != nil {
-			log.Println("userInfoHandler: Error Create JSON")
+			logrus.Println("userInfoHandler: Error Create JSON")
 			return
 		}
-		logrus.Println(user)
 
 		sendJSON(info, w)
 	})
@@ -169,8 +168,8 @@ func main() {
 		e.Encode(data)
 	})
 
-	log.Println("Server is running at 9096 port.")
-	log.Fatal(http.ListenAndServe(":9096", nil))
+	logrus.Println("Server is running at 9096 port.")
+	logrus.Fatal(http.ListenAndServe(":9096", nil))
 }
 
 func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
