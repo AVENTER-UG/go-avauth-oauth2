@@ -7,8 +7,10 @@ import (
 	"os"
 
 	"git.aventer.biz/AVENTER/util"
+	"github.com/go-redis/redis"
 	"github.com/go-session/session"
 	"github.com/sirupsen/logrus"
+	oredis "gopkg.in/go-oauth2/redis.v3"
 	"gopkg.in/oauth2.v3/errors"
 	"gopkg.in/oauth2.v3/manage"
 	"gopkg.in/oauth2.v3/models"
@@ -29,6 +31,8 @@ var (
 	EnableSyslog   bool
 	UserGroup      string
 	Identifier     string
+	RedisServer    string
+	RedisDB        string
 )
 
 type UserInfo struct {
@@ -50,6 +54,7 @@ func main() {
 	ClientSecret = os.Getenv("CLIENTSECRET")
 	LogLevel = os.Getenv("LOGLEVEL")
 	UserGroup = os.Getenv("GROUP")
+	RedisServer = os.Getenv("REDIS_SERVER")
 	JwtSignKey = os.Getenv("JWT_SIGNKEY")
 
 	util.SetLogging(LogLevel, EnableSyslog, AppName)
@@ -63,7 +68,9 @@ func main() {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
 	// token store
-	manager.MustTokenStorage(store.NewMemoryTokenStore())
+	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
+		Addr: RedisServer,
+	}))
 
 	// generate jwt access token
 	manager.MapAccessGenerate(&JWTGenerator{SignedKey: []byte(JwtSignKey)})
