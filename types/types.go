@@ -1,5 +1,7 @@
 package types
 
+import "github.com/dgrijalva/jwt-go"
+
 type CheckAuth struct {
 	Method string `json:"method"`
 	Client struct {
@@ -14,4 +16,12 @@ type CheckAuth struct {
 	} `json:"client"`
 	Token string `json:"token"`
 	Auth  bool   `json:"auth"`
+}
+
+type CustomClaims struct {
+	Type            string `json:"type"`
+	ClientID        string `json:"client_id"`
+	GroupMaster     string `json:"group_master"`
+	GroupAdditional string `json:"group_additional"`
+	jwt.StandardClaims
 }
