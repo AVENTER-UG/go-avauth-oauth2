@@ -84,6 +84,7 @@ func main() {
 	http.HandleFunc("/oauth/userinfo", userInfoHandler)
 	http.HandleFunc("/oauth/authorize", authorizeHandler)
 	http.HandleFunc("/oauth/token", tokenHandler)
+	http.HandleFunc("/health", apiHealth)
 
 	logrus.Println("Server is running at 9096 port.")
 	logrus.Fatal(http.ListenAndServe(":9096", nil))
