@@ -32,6 +32,7 @@ var (
 	Identifier     string
 	RedisServer    string
 	RedisDB        string
+	Cache          *redis.Client
 	Srv            *server.Server
 )
 
@@ -51,6 +52,8 @@ func main() {
 	logrus.Info("ClientDomain=", ClientDomain)
 	logrus.Info("ClientSecret=", ClientSecret)
 	logrus.Info("ClientID=", ClientID)
+
+	initCache()
 
 	manager := manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
@@ -104,4 +107,17 @@ func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 func sendJSON(js []byte, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Write(js)
+}
+
+// init the redis cache
+func initCache() {
+	client := redis.NewClient(&redis.Options{
+		Addr: RedisServer,
+		DB:   1,
+	})
+
+	pong, err := client.Ping().Result()
+	logrus.Debug(pong, err)
+
+	Cache = client
 }

@@ -28,5 +28,13 @@ func apiHealth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err = Cache.Ping().Result()
+
+	if err != nil {
+		logrus.Error("Health to Redis Server: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
