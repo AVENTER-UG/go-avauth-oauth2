@@ -19,6 +19,7 @@ func (a *JWTGenerator) Token(data *oauth2.GenerateBasic, isGenRefresh bool) (acc
 	// Create the Claims
 	myClaims := &cfg.CustomClaims{
 		ClientID: data.UserID,
+		Type:     "user",
 		StandardClaims: jwt.StandardClaims{
 			Audience:  data.Client.GetID(),
 			Subject:   data.UserID,

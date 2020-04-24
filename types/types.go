@@ -15,6 +15,7 @@ type CheckAuth struct {
 		Country         string `json:"country"`
 		GroupMaster     string `json:"group_master"`
 		GroupAdditional string `json:"group_additional"`
+		Notes           string `json:"notes"`
 	} `json:"client"`
 	Token string `json:"token"`
 	Auth  bool   `json:"auth"`
@@ -25,17 +26,6 @@ type CustomClaims struct {
 	ClientID        string `json:"client_id"`
 	GroupMaster     string `json:"group_master"`
 	GroupAdditional string `json:"group_additional"`
+	Notes           string `json:"notes"`
 	jwt.StandardClaims
-}
-
-type UserInfo struct {
-	UserID      string `json:"user_id"`
-	UserName    string `json:"user_name"`
-	EMail       string `json:"email"`
-	ConnectorID string `json:"connector_id"`
-	Sub         string `json:"sub"`
-	Name        string `json:"name"`
-	Auth        string `json:"auth"`
-	ClientID    string `json:"client_id"`
-	Type        string `json:"type"`
 }

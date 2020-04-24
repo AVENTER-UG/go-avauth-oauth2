@@ -54,6 +54,7 @@ func userInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//var info []byte
+
 	info, err := json.Marshal(token)
 
 	if err != nil {
