@@ -13,8 +13,6 @@ import (
 	"gopkg.in/oauth2.v3/models"
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/oauth2.v3/store"
-
-	cfg "./types"
 )
 
 var (
@@ -24,7 +22,6 @@ var (
 	ClientDomain   string
 	ClientID       string
 	ClientSecret   string
-	User           cfg.UserInfo
 	LogLevel       string
 	AppName        string
 	EnableSyslog   bool

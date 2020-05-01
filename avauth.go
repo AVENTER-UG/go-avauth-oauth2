@@ -45,11 +45,14 @@ func AuthUser(username, password string) cfg.CheckAuth {
 	if UserGroup != "" {
 		if len(ug) >= 2 {
 			if !strings.Contains(ug[1], UserGroup) {
-				logrus.Debug("AuthUser: ug: ", ug, " UserGroup: ", UserGroup)
 				user.Auth = false
 			}
+		} else {
+			user.Auth = false
 		}
 	}
+
+	logrus.Debug("AuthUser: ug: ", ug, " UserGroup: ", UserGroup)
 
 	return user
 }
