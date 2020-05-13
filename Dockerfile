@@ -18,7 +18,6 @@ ENV AUTH_SERVER "http://avauth"
 ENV CALLBACKURL "http://localhost:9094"
 ENV CLIENTID "1"
 ENV CLIENTSECRET "2"
-ENV GROUP "11:11"
 
 RUN adduser -S -D -H -h /app appuser
 
