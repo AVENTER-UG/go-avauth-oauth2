@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/oauth2.v3"
 
-	cfg "./types"
+	cfg "github.com/AVENTER-UG/go-avauth-oauth2/types"
 )
 
 type JWTGenerator struct {

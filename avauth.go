@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	cfg "./types"
+	cfg "github.com/AVENTER-UG/go-avauth-oauth2/types"
 )
 
 // AuthUser Function to authenticate a user against the ispconfig backend system
