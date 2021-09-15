@@ -1,7 +1,7 @@
 package main
 
 import (
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/oauth2.v3"
 

@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	github.com/AVENTER-UG/util v0.1.1
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-session/session v3.1.2+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	gopkg.in/go-oauth2/redis.v3 v3.2.1
 	gopkg.in/oauth2.v3 v3.12.0
@@ -14,6 +14,7 @@ require (
 
 require (
 	github.com/AVENTER-UG/go-logrus-formatter v0.0.0-20181204170756-e4bb1d931585 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.8 // indirect
