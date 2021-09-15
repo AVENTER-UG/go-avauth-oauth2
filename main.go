@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"git.aventer.biz/AVENTER/util"
+	"github.com/AVENTER-UG/util"
 	"github.com/go-redis/redis"
 	"github.com/go-session/session"
 	"github.com/sirupsen/logrus"
