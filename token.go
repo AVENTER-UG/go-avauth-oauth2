@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
+
 	jwt "github.com/golang-jwt/jwt"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/oauth2.v3"
+	"gopkg.in/oauth2.v4"
 
 	cfg "github.com/AVENTER-UG/go-avauth-oauth2/types"
 )
@@ -12,7 +14,7 @@ type JWTGenerator struct {
 	SignedKey []byte
 }
 
-func (a *JWTGenerator) Token(data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
+func (a *JWTGenerator) Token(ctx context.Context, data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
 	logrus.Debug("Token: LoggedIn: ", data)
 	signingKey := []byte(JwtSignKey)
 

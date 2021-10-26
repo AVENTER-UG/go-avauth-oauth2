@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"gopkg.in/oauth2.v3/errors"
+	"gopkg.in/oauth2.v4/errors"
 )
 
 func srvPasswordAuthorizationHandler(username, password string) (userID string, err error) {
