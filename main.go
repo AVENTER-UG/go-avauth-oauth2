@@ -8,11 +8,11 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/go-session/session"
 	"github.com/sirupsen/logrus"
-	oredis "gopkg.in/go-oauth2/redis.v3"
-	"gopkg.in/oauth2.v3/manage"
-	"gopkg.in/oauth2.v3/models"
-	"gopkg.in/oauth2.v3/server"
-	"gopkg.in/oauth2.v3/store"
+	oredis "gopkg.in/go-oauth2/redis.v4"
+	"gopkg.in/oauth2.v4/manage"
+	"gopkg.in/oauth2.v4/models"
+	"gopkg.in/oauth2.v4/server"
+	"gopkg.in/oauth2.v4/store"
 )
 
 var (
@@ -62,7 +62,6 @@ func main() {
 
 	// generate jwt access token
 	manager.MapAccessGenerate(&JWTGenerator{SignedKey: []byte(JwtSignKey)})
-	//	manager.MapAccessGenerate(generates.NewAccessGenerate())
 
 	clientStore := store.NewClientStore()
 	clientStore.Set(ClientID, &models.Client{
