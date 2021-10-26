@@ -4,7 +4,7 @@ This is a oauth2 provider that use the aventer backend systems to authenticate. 
 
 ## How to use
 
-This OAuth provider need the folowing information as environment variable.
+This OAuth provider need the following information as environment variable.
 
 ```bash
 export AUTH_SERVER=https://<AUTH SERVER>
